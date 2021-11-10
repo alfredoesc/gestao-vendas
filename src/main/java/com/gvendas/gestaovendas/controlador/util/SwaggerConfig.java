@@ -26,7 +26,7 @@ public class SwaggerConfig {
 	private ApiInfo informacaoApi() {
 		return new ApiInfoBuilder()
 				.title("Gestao de Vendas")
-				.description("Sistema de gestao de vendas")
+				.description("Sistema de Gestao de Vendas")
 				.version("1.0.0")
 				.build();
 	}

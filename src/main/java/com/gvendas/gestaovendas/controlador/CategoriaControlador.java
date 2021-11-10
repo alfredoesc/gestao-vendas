@@ -2,6 +2,7 @@ package com.gvendas.gestaovendas.controlador;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.gvendas.gestaovendas.dto.categoria.CategoriaRequestDTO;
+import com.gvendas.gestaovendas.dto.categoria.CategoriaResponseDTO;
 import com.gvendas.gestaovendas.entidades.Categoria;
 import com.gvendas.gestaovendas.servico.CategoriaServico;
 
@@ -26,39 +29,46 @@ import io.swagger.annotations.ApiOperation;
 
 @Api(tags = "Categoria")
 @RestController
-@RequestMapping("/categoria")
+@RequestMapping("/categoria") // pagina do mapeamento
 public class CategoriaControlador {
 
 	@Autowired
-	private CategoriaServico categoriaServico;
-	
-	@ApiOperation(value = "Listar", nickname = "listarTodas")
+	private CategoriaServico categoriaServico; // controlador acessando o servico
+
+	@ApiOperation(value = "Listar", nickname = "listarCategorias")
 	@GetMapping
-	public List<Categoria> listarTodas() {
-		return categoriaServico.listarTodas();
+	public List<CategoriaResponseDTO> listarTodas() { // percorrer todas as categorias da lista pra converter
+		return categoriaServico.listarTodas().stream()
+				.map(categoria -> CategoriaResponseDTO.converterParaCategoriaDTO(categoria))
+				.collect(Collectors.toList());
 	}
-	
-	@ApiOperation(value = "Listar por codigo", nickname = "buscarPorCodigo")
-	@GetMapping("/{codigo}")
-	public ResponseEntity<Optional<Categoria>> buscarPorCodigo(@PathVariable Long codigo) {
+
+	@ApiOperation(value = "Buscar por Codigo", nickname = "buscarPorCodigo")
+	@GetMapping("/{codigo}") // para passar o valor de requisicao na api
+	public ResponseEntity<CategoriaResponseDTO> buscarPorCodigo(@PathVariable Long codigo) {
+		// Optional<Categoria> para retornar o status correto da requisicao
 		Optional<Categoria> categoria = categoriaServico.buscarPorCodigo(codigo);
-		return categoria.isPresent() ? ResponseEntity.ok(categoria) : ResponseEntity.notFound().build();
+		return categoria.isPresent()
+				? ResponseEntity.ok(CategoriaResponseDTO.converterParaCategoriaDTO(categoria.get())) // se ela existe pega com o get e converte
+				: ResponseEntity.notFound().build();
 	}
-	
-	@ApiOperation(value = "Salvar", nickname = "salvar")
+
+	@ApiOperation(value = "Salvar", nickname = "salvarCategoria")
 	@PostMapping
-	public ResponseEntity<Categoria> salvar(@Valid @RequestBody Categoria categoria) {
-		Categoria categoriaSalva = categoriaServico.salvar(categoria);
-		return ResponseEntity.status(HttpStatus.CREATED).body(categoriaSalva);
+	public ResponseEntity<CategoriaResponseDTO> salvar(@Valid @RequestBody CategoriaRequestDTO categoriaDto) { // o objeto vem no corpo do
+																						// requerimento
+		// @Valid, eh nele q se faz a validacao quando esta tentando salvar
+		Categoria categoriaSalva = categoriaServico.salvar(categoriaDto.converterParaEntidade());
+		return ResponseEntity.status(HttpStatus.CREATED).body(CategoriaResponseDTO.converterParaCategoriaDTO(categoriaSalva));
 	}
-	
-	@ApiOperation(value = "Atualizar", nickname = "atualizar")
+
+	@ApiOperation(value = "Atualizar", nickname = "atualizarCategoria")
 	@PutMapping("/{codigo}")
-	public ResponseEntity<Categoria> atualizar(@PathVariable Long codigo, @Valid @RequestBody Categoria categoria) {
-		return ResponseEntity.ok(categoriaServico.atualizar(codigo, categoria));
+	public ResponseEntity<Categoria> atualizar(@PathVariable Long codigo, @Valid @RequestBody CategoriaRequestDTO categoriaDto) {
+		return ResponseEntity.ok(categoriaServico.atualizar(codigo, categoriaDto.converterParaEntidade(codigo)));
 	}
-	
-	@ApiOperation(value = "Deletar", nickname = "deletar")
+
+	@ApiOperation(value = "Deletar", nickname = "deletarCategoria")
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable Long codigo) {

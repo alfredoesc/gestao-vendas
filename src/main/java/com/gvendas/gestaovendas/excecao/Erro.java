@@ -18,5 +18,4 @@ public class Erro {
 	public String getMsgDesenvolvedor() {
 		return msgDesenvolvedor;
 	}
-
 }

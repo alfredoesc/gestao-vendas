@@ -16,10 +16,10 @@ import javax.persistence.Table;
 @Table(name = "produto")
 public class Produto {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "codigo")
-	private Long codigo;
+	@Id // chave primaria
+	@GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
+	@Column(name = "codigo") // @Column pq eh o nome da coluna do banco
+	private Long codigo; // Long pq na tabela eh bigint
 
 	@Column(name = "descricao")
 	private String descricao;
@@ -36,9 +36,34 @@ public class Produto {
 	@Column(name = "observacao")
 	private String observacao;
 
-	@ManyToOne
-	@JoinColumn(name = "codigo_categoria", referencedColumnName = "codigo")
+	@ManyToOne // pq esta vinculado a uma categoria, mas uma categoria a varios produtos
+	@JoinColumn(name = "codigo_categoria", referencedColumnName = "codigo") // relacionamento a tabela categoria
 	private Categoria categoria;
+
+	public Produto() {
+		
+	}
+	
+	public Produto(Long codigo, String descricao, Integer quantidade, BigDecimal precoCusto,
+			BigDecimal precoVenda, String observacao, Categoria categoria) {
+		this.codigo = codigo;
+		this.descricao = descricao;
+		this.quantidade = quantidade;
+		this.precoCusto = precoCusto;
+		this.precoVenda = precoVenda;
+		this.observacao = observacao;
+		this.categoria = categoria;
+	}
+	
+	public Produto(String descricao, Integer quantidade, BigDecimal precoCusto,
+			BigDecimal precoVenda, String observacao, Categoria categoria) {
+		this.descricao = descricao;
+		this.quantidade = quantidade;
+		this.precoCusto = precoCusto;
+		this.precoVenda = precoVenda;
+		this.observacao = observacao;
+		this.categoria = categoria;
+	}
 
 	public Long getCodigo() {
 		return codigo;
@@ -115,5 +140,4 @@ public class Produto {
 				&& Objects.equals(precoCusto, other.precoCusto) && Objects.equals(precoVenda, other.precoVenda)
 				&& Objects.equals(quantidade, other.quantidade);
 	}
-	
 }

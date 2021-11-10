@@ -8,23 +8,35 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import javax.validation.constraints.NotBlank;
-
-import org.hibernate.validator.constraints.Length;
 
 @Entity
 @Table(name = "categoria")
 public class Categoria {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "codigo")
-	private Long codigo;
+	@Id // chave primaria
+	@GeneratedValue(strategy = GenerationType.IDENTITY) // auto_increment
+	@Column(name = "codigo") // @Column pq eh o nome da coluna do banco
+	private Long codigo; // Long pq na tabela eh bigint
+
+	@Column(name = "nome") // @Column pq eh o nome da coluna do banco
+	private String nome; // String pq na tabela varchar
+
+	public Categoria() {
+		
+	}
 	
-	@Column(name = "nome")
-	@NotBlank(message = "Nome")
-	@Length(min = 3, max = 50, message = "Nome")
-	private String nome;
+	public Categoria(Long codigo) {
+		this.codigo = codigo;
+	}
+	
+	public Categoria(String nome) {
+		this.nome = nome;
+	}
+	
+	public Categoria(Long codigo, String nome) {
+		this.codigo = codigo;
+		this.nome = nome;
+	}
 
 	public Long getCodigo() {
 		return codigo;
@@ -58,5 +70,4 @@ public class Categoria {
 		Categoria other = (Categoria) obj;
 		return Objects.equals(codigo, other.codigo) && Objects.equals(nome, other.nome);
 	}
-	
 }

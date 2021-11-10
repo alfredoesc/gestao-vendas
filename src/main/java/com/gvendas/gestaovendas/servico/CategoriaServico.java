@@ -15,17 +15,18 @@ import com.gvendas.gestaovendas.repositorio.CategoriaRepositorio;
 @Service
 public class CategoriaServico {
 
-	@Autowired
-	private CategoriaRepositorio categoriaRepositorio;
+	@Autowired // faz a injecao via execucao (se nao tiver eh capaz de tomar null pointer)
+	private CategoriaRepositorio categoriaRepositorio; // vai ligar ao repositorio
 
 	public List<Categoria> listarTodas() {
-		return categoriaRepositorio.findAll();
+		return categoriaRepositorio.findAll(); // vai no repositorio procurar todas
 	}
 
 	public Optional<Categoria> buscarPorCodigo(Long codigo) {
-		return categoriaRepositorio.findById(codigo);
+		return categoriaRepositorio.findById(codigo); // vai no repositorio procurar por codigo
 	}
 
+	// a categoria vai vir do endpoint (front-end)
 	public Categoria salvar(Categoria categoria) {
 		validarCategoriaDuplicada(categoria);
 		return categoriaRepositorio.save(categoria);
@@ -34,8 +35,7 @@ public class CategoriaServico {
 	public Categoria atualizar(Long codigo, Categoria categoria) {
 		Categoria categoriaSalvar = validarCategoriaExiste(codigo);
 		validarCategoriaDuplicada(categoria);
-		BeanUtils.copyProperties(categoria, categoriaSalvar, "codigo");
-
+		BeanUtils.copyProperties(categoria, categoriaSalvar, "codigo"); // alterar, exceto o codigo
 		return categoriaRepositorio.save(categoriaSalvar);
 	}
 
@@ -45,7 +45,6 @@ public class CategoriaServico {
 
 	private Categoria validarCategoriaExiste(Long codigo) {
 		Optional<Categoria> categoria = buscarPorCodigo(codigo);
-
 		if (categoria.isEmpty()) {
 			throw new EmptyResultDataAccessException(1);
 		}
@@ -54,10 +53,9 @@ public class CategoriaServico {
 
 	private void validarCategoriaDuplicada(Categoria categoria) {
 		Categoria categoriaEncontrada = categoriaRepositorio.findByNome(categoria.getNome());
-
 		if (categoriaEncontrada != null && categoriaEncontrada.getCodigo() != categoria.getCodigo()) {
 			throw new RegraNegocioException(
-					String.format("A categoria %s ja esta cadastrada", categoria.getNome().toUpperCase()));
+					String.format("A categoria %s ja esta cadastrada.", categoria.getNome().toUpperCase()));
 		}
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -16,12 +17,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-@ControllerAdvice
+@ControllerAdvice // toda classe q tem isso fica ouvindo e ve se tem tratamento especifico pra
+					// quela excecao
 public class GestaoVendasTratamentoExcecao extends ResponseEntityExceptionHandler {
 
 	private static final String CONSTANT_VALIDATION_NOT_BLANK = "NotBlank";
 
-	private static final String CONSTANT_VALIDATION_LENGHT = "Length";
+	private static final String CONSTANT_VALIDATION_LENGTH = "Length";
+	
+	private static final String CONSTANT_VALIDATION_NOT_NULL = "NotNull";
 
 	@Override
 	protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
@@ -31,25 +35,28 @@ public class GestaoVendasTratamentoExcecao extends ResponseEntityExceptionHandle
 
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
-
+	
 	@ExceptionHandler(EmptyResultDataAccessException.class)
-	public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex,
-			WebRequest request) {
-
+	public ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request) {
 		String msgUsuario = "Recurso nao encontrado.";
 		String msgDesenvolvedor = ex.toString();
 		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
-
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+	}
+	
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
+		String msgUsuario = "Recurso nao encontrado.";
+		String msgDesenvolvedor = ex.toString();
+		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
+		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
 	
 	@ExceptionHandler(RegraNegocioException.class)
 	public ResponseEntity<Object> handleRegraNegocioException(RegraNegocioException ex, WebRequest request) {
-		
 		String msgUsuario = ex.getMessage();
 		String msgDesenvolvedor = ex.getMessage();
 		List<Erro> erros = Arrays.asList(new Erro(msgUsuario, msgDesenvolvedor));
-
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
 
@@ -60,20 +67,20 @@ public class GestaoVendasTratamentoExcecao extends ResponseEntityExceptionHandle
 			String msgDesenvolvedor = fieldError.toString();
 			erros.add(new Erro(msgUsuario, msgDesenvolvedor));
 		});
-
 		return erros;
 	}
 
 	private String tratarMensagemDeErroParaUsuario(FieldError fieldError) {
 		if (fieldError.getCode().equals(CONSTANT_VALIDATION_NOT_BLANK)) {
-			return fieldError.getDefaultMessage().concat(" e obrigatorio.");
+			return fieldError.getDefaultMessage().concat(" e obrigatorio");
 		}
-
-		if (fieldError.getCode().equals(CONSTANT_VALIDATION_LENGHT)) {
-			return fieldError.getDefaultMessage().concat(String.format(" deve ter entre %s e %s caracteres.",
+		if (fieldError.getCode().equals(CONSTANT_VALIDATION_NOT_NULL)) {
+			return fieldError.getDefaultMessage().concat(" e obrigatorio");
+		}
+		if (fieldError.getCode().equals(CONSTANT_VALIDATION_LENGTH)) {
+			return fieldError.getDefaultMessage().concat(String.format(" deve ter entre %s e %s caracteres",
 					fieldError.getArguments()[2], fieldError.getArguments()[1]));
 		}
-
 		return fieldError.toString();
 	}
 }

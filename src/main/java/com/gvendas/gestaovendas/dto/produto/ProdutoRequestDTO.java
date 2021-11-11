@@ -41,7 +41,7 @@ public class ProdutoRequestDTO {
 		return new Produto(descricao, quantidade, precoCusto, precoVenda, observacao, new Categoria(codigoCategoria));
 	}
 	
-	public Produto converterParaEntidade(Long codigoProduto, Long codigoCategoria) {
+	public Produto converterParaEntidade(Long codigoCategoria, Long codigoProduto) {
 		return new Produto(codigoProduto, descricao, quantidade, precoCusto, precoVenda, observacao, new Categoria(codigoCategoria));
 	}
 

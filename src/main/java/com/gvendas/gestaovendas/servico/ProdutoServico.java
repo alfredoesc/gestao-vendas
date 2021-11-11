@@ -36,7 +36,7 @@ public class ProdutoServico {
 	}
 
 	public Produto atualizar(Long codigoCategoria, Long codigoProduto, Produto produto) {
-		Produto produtoSalvar = validarProdutoExiste(codigoCategoria, codigoProduto);
+		Produto produtoSalvar = validarProdutoExiste(codigoProduto, codigoCategoria);
 		validarCategoriaDoProdutoExiste(codigoCategoria);
 		validarProdutoDuplicado(produto);
 		BeanUtils.copyProperties(produto, produtoSalvar, "codigo");
